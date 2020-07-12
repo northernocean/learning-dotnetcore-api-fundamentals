@@ -1,11 +1,13 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace CoreCodeCamp.Data
 {
   public class Camp
   {
+    [Key]
     public int CampId { get; set; }
     public string Name { get; set; }
     public string Moniker { get; set; }
