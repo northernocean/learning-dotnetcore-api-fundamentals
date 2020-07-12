@@ -1,4 +1,6 @@
-﻿using CoreCodeCamp.Data;
+﻿using AutoMapper;
+using CoreCodeCamp.Data;
+using CoreCodeCamp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,24 +13,45 @@ namespace CoreCodeCamp.Controllers
     public class CampsController : ControllerBase
     {
         private readonly ICampRepository campRepository;
+        private readonly IMapper mapper;
 
-        public CampsController(ICampRepository campRepository)
+        public CampsController(ICampRepository campRepository, IMapper mapper)
         {
             this.campRepository = campRepository;
+            this.mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<CampModel[]>> Get()
         {
             try
             {
-                var result = await campRepository.GetAllCampsAsync();
-                return Ok(result);
+                var camps = await campRepository.GetAllCampsAsync();
+                return mapper.Map<CampModel[]>(camps);
             }
-            catch(Exception)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure."); 
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure.");
             }
         }
+
+        [HttpGet("{moniker}")]
+        public async Task<ActionResult<CampModel>> Get(string moniker)
+        {
+            try
+            {
+                var camp = await campRepository.GetCampAsync(moniker);
+                if (camp is null)
+                    return NotFound();
+                return mapper.Map<CampModel>(camp);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure.");
+            }
+            
+
+        }
+
     }
 }
