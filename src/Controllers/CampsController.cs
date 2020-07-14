@@ -12,6 +12,8 @@ namespace CoreCodeCamp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
+    [ApiVersion("1.1")]
     public class CampsController : ControllerBase
     {
         private readonly ICampRepository campRepository;
@@ -41,11 +43,29 @@ namespace CoreCodeCamp.Controllers
         }
 
         [HttpGet("{moniker}")]
+        [MapToApiVersion("1.0")]
         public async Task<ActionResult<CampModel>> Get(string moniker)
         {
             try
             {
                 var camp = await campRepository.GetCampAsync(moniker);
+                if (camp is null)
+                    return NotFound();
+                return mapper.Map<CampModel>(camp);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Error.");
+            }
+        }
+        
+        [HttpGet("{moniker}")]
+        [MapToApiVersion("1.1")]
+        public async Task<ActionResult<CampModel>> Get_1_1(string moniker)
+        {
+            try
+            {
+                var camp = await campRepository.GetCampAsync(moniker, true);
                 if (camp is null)
                     return NotFound();
                 return mapper.Map<CampModel>(camp);
